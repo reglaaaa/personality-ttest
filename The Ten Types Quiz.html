@@ -1,0 +1,400 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Ten Types Quiz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Unbounded:wght@700&display=swap">
+<style>
+/* Layout: one narrow column. Start, question and result are three views swapping inside the same frame.
+   Cobalt accent on a violet-tinted neutral; each result borrows its own hue through --th. */
+:root{
+  --bg:#F1F2F8;
+  --surface:#FFFFFF;
+  --ink:#13152B;
+  --muted:#5A5D7A;
+  --line:#D8DAEA;
+  --accent:#2747F0;
+  --accent-ink:#FFFFFF;
+  --th:250;
+  --tc:hsl(var(--th) 65% 33%);
+  --font-display:'Unbounded','Arial Black',system-ui,sans-serif;
+  --font-body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+.tinted{--tc:hsl(var(--th) 65% 33%)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1022;--surface:#171A33;--ink:#ECEEFB;--muted:#A0A4C6;--line:#2C3050;
+    --accent:#8EA2FF;--accent-ink:#0E1022;--tc:hsl(var(--th) 85% 72%);
+    color-scheme:dark;
+  }
+  :root:not([data-theme="light"]) .tinted{--tc:hsl(var(--th) 85% 72%)}
+}
+:root[data-theme="dark"]{
+  --bg:#0E1022;--surface:#171A33;--ink:#ECEEFB;--muted:#A0A4C6;--line:#2C3050;
+  --accent:#8EA2FF;--accent-ink:#0E1022;--tc:hsl(var(--th) 85% 72%);
+  color-scheme:dark;
+}
+:root[data-theme="dark"] .tinted{--tc:hsl(var(--th) 85% 72%)}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--font-body);font-size:1rem;line-height:1.5;
+  padding-block:28px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+button{font:inherit;color:inherit}
+.wrap{max-width:34rem;margin-inline:auto}
+.view{display:flex;flex-direction:column;gap:22px;animation:rise .25s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.eyebrow{
+  font-family:var(--font-mono);font-size:.75rem;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;
+}
+
+/* start */
+.title{
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(1.75rem,6.6vw,2.6rem);line-height:1.12;margin:0;
+  text-wrap:balance;overflow-wrap:anywhere;
+}
+.lede{margin:0;font-size:1.1rem;color:var(--muted);max-width:65ch}
+.btn{
+  align-self:flex-start;background:var(--accent);color:var(--accent-ink);
+  border:0;border-radius:999px;padding:14px 28px;font-weight:700;font-size:1.05rem;cursor:pointer;
+}
+.btn:focus-visible,.opt:focus-visible,.back:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.types{display:flex;flex-direction:column;gap:12px;padding-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.chip{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 13px;
+  border:1px solid var(--line);border-radius:999px;background:var(--surface);
+  font-size:.92rem;font-weight:500;
+}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--tc);flex:none}
+
+/* quiz */
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.back{
+  background:none;border:0;border-radius:8px;color:var(--muted);cursor:pointer;
+  font-weight:600;padding:10px 12px;margin-left:-12px;
+}
+.back:disabled{opacity:.35;cursor:default}
+.progress{display:grid;grid-template-columns:repeat(20,1fr);gap:3px}
+.progress span{height:6px;border-radius:3px;background:var(--line)}
+.progress span.done{background:var(--accent)}
+.progress span.now{background:var(--muted)}
+.question{
+  font-size:clamp(1.3rem,5.4vw,1.7rem);font-weight:700;line-height:1.25;
+  margin:0;min-height:2.5em;text-wrap:balance;
+}
+.opts{display:grid;gap:12px}
+.opt{
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:start;
+  width:100%;text-align:left;cursor:pointer;
+  background:var(--surface);border:1.5px solid var(--line);border-radius:16px;
+  padding:16px;font-size:1.05rem;line-height:1.4;
+}
+.key{
+  display:grid;place-items:center;width:26px;height:26px;border-radius:8px;
+  font-family:var(--font-mono);font-weight:700;font-size:.8rem;
+  background:var(--bg);color:var(--muted);
+}
+@media (hover:hover){.opt:hover{border-color:var(--accent)}}
+.opt.chosen{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.opt.chosen .key{background:var(--accent-ink);color:var(--accent)}
+
+/* result */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:22px;
+  padding:24px;display:flex;flex-direction:column;gap:16px;
+}
+.code{
+  align-self:flex-start;font-family:var(--font-mono);font-weight:700;
+  letter-spacing:.14em;font-size:.9rem;padding:6px 12px;border-radius:8px;
+  background:color-mix(in srgb,var(--tc) 14%,var(--surface));color:var(--tc);
+}
+.typename{
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(1.65rem,7vw,2.4rem);line-height:1.12;margin:0;color:var(--tc);
+  text-wrap:balance;overflow-wrap:anywhere;
+}
+.typename:focus{outline:none}
+.desc{margin:0;font-size:1.1rem;line-height:1.55;max-width:65ch}
+.balance{display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line);padding-top:18px;margin-top:4px}
+.rows{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;flex-direction:column;gap:6px}
+.labels{display:flex;justify-content:space-between;gap:12px;font-size:.92rem;color:var(--muted)}
+.labels .lead{color:var(--ink);font-weight:700}
+.labels span{font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--tc)}
+.runner{margin:0;display:flex;align-items:center;gap:8px;color:var(--muted);flex-wrap:wrap}
+.runner strong{color:var(--ink)}
+.note{margin:0;font-size:.85rem;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<main class="wrap">
+
+  <section id="start" class="view">
+    <p class="eyebrow">20 questions · about 3 minutes</p>
+    <h1 class="title">Which of the ten are you?</h1>
+    <p class="lede">Pick the answer that sounds more like you. There are no right answers, only ten types and one closest match.</p>
+    <button id="startBtn" class="btn" type="button">Start the quiz</button>
+    <div class="types">
+      <h2 class="eyebrow">The ten types</h2>
+      <ul id="chips" class="chips"></ul>
+    </div>
+  </section>
+
+  <section id="quiz" class="view" hidden>
+    <div class="qhead">
+      <button id="backBtn" class="back" type="button">&larr; Back</button>
+      <span id="counter" class="eyebrow"></span>
+    </div>
+    <div id="progress" class="progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="1" aria-valuemax="20" aria-valuenow="1"></div>
+    <h2 id="qText" class="question" aria-live="polite"></h2>
+    <div class="opts">
+      <button id="optA" class="opt" type="button" aria-pressed="false"><span class="key">A</span><span id="optAText"></span></button>
+      <button id="optB" class="opt" type="button" aria-pressed="false"><span class="key">B</span><span id="optBText"></span></button>
+    </div>
+  </section>
+
+  <section id="result" class="view tinted" hidden>
+    <p class="eyebrow">Your closest type</p>
+    <article class="card">
+      <span id="rCode" class="code"></span>
+      <h2 id="rName" class="typename" tabindex="-1"></h2>
+      <p id="rText" class="desc"></p>
+      <div class="balance">
+        <h3 class="eyebrow">Your balance</h3>
+        <div id="rows" class="rows"></div>
+      </div>
+    </article>
+    <p id="rRunner" class="runner"></p>
+    <button id="retakeBtn" class="btn" type="button">Retake the quiz</button>
+    <p class="note">For fun only. This is not a clinical assessment.</p>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var TYPES = [
+    { code: "INTJ", name: "The Mastermind",   hue: 252, text: "Strategic and independent. Thinks five steps ahead, values competence, and trusts logic over emotion. Can come across as distant, but is deeply loyal to a few." },
+    { code: "INFP", name: "The Dreamer",      hue: 305, text: "Gentle, imaginative, and guided by strong values. Sees the beauty in people and ideas. Sensitive and sometimes overly idealistic." },
+    { code: "ENTJ", name: "The Boss",         hue: 10,  text: "Confident, driven, and decisive. Naturally takes charge, sets big goals, and pushes others to reach them. Can be blunt or overbearing." },
+    { code: "ESFP", name: "The Party Starter",hue: 32,  text: "Spontaneous, warm, and magnetic. Lives in the moment and lifts the mood of any room. May avoid serious planning or hard conversations." },
+    { code: "ISFJ", name: "The Caretaker",    hue: 150, text: "Loyal, thoughtful, and quietly generous. Remembers the little things and puts others first. Tends to neglect their own needs." },
+    { code: "ENTP", name: "The Challenger",   hue: 182, text: "Quick-witted and endlessly curious. Loves debate, new ideas, and poking holes in assumptions. Can struggle with follow-through." },
+    { code: "ISTJ", name: "The Rock",         hue: 215, text: "Dependable, disciplined, and practical. Keeps promises and values order and tradition. Can be resistant to change." },
+    { code: "INFJ", name: "The Guide",        hue: 275, text: "Insightful, principled, and deeply empathetic. Reads people well and wants to help them grow. Often private and prone to burnout." },
+    { code: "ENFP", name: "The Spark",        hue: 335, text: "Enthusiastic, creative, and people-loving. Sees possibilities everywhere and inspires others. Can get scattered or lose interest quickly." },
+    { code: "ISTP", name: "The Tinkerer",     hue: 88,  text: "Calm, observant, and hands-on. Solves problems by experimenting and dislikes unnecessary drama. Can be reserved and hard to read." }
+  ];
+
+  var DIMS = [
+    { a: "E", b: "I", an: "Extravert", bn: "Introvert" },
+    { a: "S", b: "N", an: "Sensing",   bn: "Intuition" },
+    { a: "T", b: "F", an: "Thinking",  bn: "Feeling" },
+    { a: "J", b: "P", an: "Judging",   bn: "Perceiving" }
+  ];
+  var W = [1.04, 1.03, 1.02, 1.01]; /* tiny weights so a tie always resolves the same way */
+
+  /* [question, answer A, pole A, answer B, pole B] */
+  var Q = [
+    ["After a long week, you would rather:", "Go out with a big group of friends", "E", "Stay in and recharge on your own", "I"],
+    ["You trust more:", "What you have seen and tested yourself", "S", "Your gut feeling about where things are heading", "N"],
+    ["In an argument you focus on:", "Who has the stronger logic", "T", "Keeping everyone's feelings in mind", "F"],
+    ["Your ideal week is:", "Planned out with a clear schedule", "J", "Flexible, with room to see what comes up", "P"],
+
+    ["At a party, you usually:", "Stick with a couple of people you know", "I", "Move around and talk to almost everyone", "E"],
+    ["You would rather read about:", "Big ideas and what could be", "N", "Real events and how things actually work", "S"],
+    ["A friend asks for advice on a problem. You:", "Listen and offer comfort first", "F", "Lay out the options and what to do", "T"],
+    ["Deadlines:", "Bring out your best work at the last minute", "P", "Get finished well ahead of time", "J"],
+
+    ["When you have good news, you:", "Tell everyone right away", "E", "Share it with one or two close people later", "I"],
+    ["When learning something new, you want:", "Clear steps and examples", "S", "The big picture first, details later", "N"],
+    ["You would rather be seen as:", "Competent and fair", "T", "Kind and understanding", "F"],
+    ["Your desk or room is usually:", "Organized, with a place for everything", "J", "A bit messy, but you know where things are", "P"],
+
+    ["You do your best thinking:", "Alone, in quiet", "I", "Out loud, talking it through with others", "E"],
+    ["People would describe you as:", "Practical and down to earth", "S", "Imaginative and a bit of a daydreamer", "N"],
+    ["When making a hard decision, you lean on:", "What matters most to you and the people involved", "F", "Pros, cons, and the facts", "T"],
+    ["On a trip, you prefer:", "Wandering and deciding as you go", "P", "Booking an itinerary ahead of time", "J"],
+
+    ["A free Saturday sounds best when it is:", "Packed with plans and people", "E", "Open, quiet, and mostly to yourself", "I"],
+    ["You get more excited by:", "Inventing a new way of doing something", "N", "Perfecting a method that already works", "S"],
+    ["Honest feedback should be:", "Direct, even if it stings", "T", "Honest, but softened with care", "F"],
+    ["When plans suddenly change, you:", "Adapt easily, and may even enjoy it", "P", "Feel unsettled until there is a new plan", "J"]
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var views = { start: $("start"), quiz: $("quiz"), result: $("result") };
+  var answers = [];
+  var idx = 0;
+  var locked = false;
+
+  function show(name) {
+    Object.keys(views).forEach(function (k) { views[k].hidden = (k !== name); });
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  /* start screen chips */
+  var chips = $("chips");
+  TYPES.forEach(function (t) {
+    var li = document.createElement("li");
+    li.className = "chip tinted";
+    li.style.setProperty("--th", t.hue);
+    var dot = document.createElement("i");
+    dot.className = "dot";
+    li.appendChild(dot);
+    li.appendChild(document.createTextNode(t.name));
+    chips.appendChild(li);
+  });
+
+  /* progress segments */
+  var prog = $("progress");
+  var segs = Q.map(function () {
+    var s = document.createElement("span");
+    prog.appendChild(s);
+    return s;
+  });
+
+  function renderQ() {
+    var q = Q[idx];
+    $("counter").textContent = "Question " + (idx + 1) + " of " + Q.length;
+    prog.setAttribute("aria-valuenow", idx + 1);
+    segs.forEach(function (s, i) {
+      s.className = i < idx ? "done" : (i === idx ? "now" : "");
+    });
+    $("qText").textContent = q[0];
+    $("optAText").textContent = q[1];
+    $("optBText").textContent = q[3];
+    var chosen = answers[idx];
+    [["optA", q[2]], ["optB", q[4]]].forEach(function (p) {
+      var on = chosen === p[1];
+      $(p[0]).classList.toggle("chosen", on);
+      $(p[0]).setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    $("backBtn").disabled = idx === 0;
+  }
+
+  function pick(i) {
+    if (locked) return;
+    var q = Q[idx];
+    answers[idx] = i === 0 ? q[2] : q[4];
+    renderQ();
+    locked = true;
+    setTimeout(function () {
+      locked = false;
+      if (idx < Q.length - 1) { idx++; renderQ(); }
+      else { showResult(); }
+    }, 170);
+  }
+
+  function back() {
+    if (locked || idx === 0) return;
+    idx--;
+    renderQ();
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function tally(list) {
+    return DIMS.map(function (d) {
+      var na = 0, nb = 0;
+      list.forEach(function (p) {
+        if (p === d.a) na++;
+        else if (p === d.b) nb++;
+      });
+      return { na: na, nb: nb };
+    });
+  }
+
+  function rank(counts) {
+    return TYPES.map(function (t) {
+      var v = 0;
+      DIMS.forEach(function (d, i) {
+        var s = counts[i].na - counts[i].nb;
+        v += W[i] * (t.code.charAt(i) === d.a ? s : -s);
+      });
+      return { t: t, v: v };
+    }).sort(function (x, y) { return y.v - x.v; });
+  }
+
+  function showResult() {
+    var counts = tally(answers);
+    var ranked = rank(counts);
+    var top = ranked[0].t, next = ranked[1].t;
+
+    views.result.style.setProperty("--th", top.hue);
+    $("rCode").textContent = top.code;
+    $("rName").textContent = top.name;
+    $("rText").textContent = top.text;
+
+    var rows = $("rows");
+    rows.textContent = "";
+    DIMS.forEach(function (d, i) {
+      var total = counts[i].na + counts[i].nb;
+      var pa = total ? Math.round(counts[i].na / total * 100) : 50;
+      var pb = 100 - pa;
+      var row = el("div", "row");
+      var labels = el("div", "labels");
+      var l = el("span", pa >= pb ? "lead" : "", d.an + " " + pa + "%");
+      var r = el("span", pb > pa ? "lead" : "", d.bn + " " + pb + "%");
+      labels.appendChild(l); labels.appendChild(r);
+      var bar = el("div", "bar");
+      var fill = el("i");
+      fill.style.width = pa + "%";
+      bar.appendChild(fill);
+      row.appendChild(labels); row.appendChild(bar);
+      rows.appendChild(row);
+    });
+
+    var runner = $("rRunner");
+    runner.textContent = "";
+    var tag = el("span", "tinted");
+    tag.style.setProperty("--th", next.hue);
+    tag.appendChild(el("i", "dot"));
+    runner.appendChild(el("span", null, "Closest runner-up:"));
+    runner.appendChild(tag);
+    runner.appendChild(el("strong", null, next.name));
+
+    show("result");
+    $("rName").focus({ preventScroll: true });
+  }
+
+  function begin() {
+    answers = [];
+    idx = 0;
+    locked = false;
+    renderQ();
+    show("quiz");
+  }
+
+  $("startBtn").addEventListener("click", begin);
+  $("retakeBtn").addEventListener("click", begin);
+  $("backBtn").addEventListener("click", back);
+  $("optA").addEventListener("click", function () { pick(0); });
+  $("optB").addEventListener("click", function () { pick(1); });
+
+  document.addEventListener("keydown", function (e) {
+    if (views.quiz.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key.toLowerCase();
+    if (k === "1" || k === "a") pick(0);
+    else if (k === "2" || k === "b") pick(1);
+    else if (e.key === "ArrowLeft") back();
+  });
+})();
+</script>
+
+</body></html>
